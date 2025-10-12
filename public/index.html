@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Healthcare Symptom Checker</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.6;
+            color: #1e293b;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem 1rem;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(10px);
+            padding: 3rem;
+            border-radius: 24px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .subtitle {
+            color: #64748b;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        textarea {
+            width: 100%;
+            min-height: 140px;
+            padding: 1rem;
+            font-size: 1rem;
+            font-family: inherit;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            background: #f8fafc;
+            transition: all 0.3s ease;
+            resize: vertical;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            background: #fff;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+
+        button {
+            width: 100%;
+            padding: 1rem 2rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #fff;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 25px rgba(102, 126, 234, 0.6);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+        }
+
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loader {
+            display: none;
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .loader-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #e2e8f0;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loader-text {
+            margin-top: 1rem;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        #result {
+            display: none;
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        #result h3 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        #result .content {
+            color: #334155;
+            line-height: 1.8;
+            white-space: pre-wrap;
+            font-size: 1rem;
+        }
+
+        .disclaimer {
+            margin-top: 2.5rem;
+            padding: 1.5rem;
+            background: #fef3c7;
+            border-radius: 12px;
+            border-left: 4px solid #f59e0b;
+            font-size: 0.95rem;
+            color: #92400e;
+        }
+
+        .disclaimer strong {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #b45309;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                padding: 2rem 1.5rem;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            .subtitle {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Healthcare Symptom Checker</h1>
+            <p class="subtitle">AI-powered symptom analysis for preliminary insights</p>
+        </div>
+
+        <form id="symptomForm">
+            <div class="form-group">
+                <label for="symptoms">Describe your symptoms:</label>
+                <textarea 
+                    id="symptoms" 
+                    name="symptoms" 
+                    placeholder="e.g., 'I've had a persistent sore throat, high fever around 101°F, and severe headache for the past two days. I also feel tired and have body aches.'"
+                    required
+                ></textarea>
+            </div>
+            <button type="submit" id="submitBtn">Analyze Symptoms</button>
+        </form>
+
+        <div class="loader" id="loader">
+            <div class="loader-spinner"></div>
+            <p class="loader-text">Analyzing your symptoms...</p>
+        </div>
+
+        <div id="result">
+            <h3>Analysis Results</h3>
+            <div class="content" id="resultContent"></div>
+        </div>
+
+        <div class="disclaimer">
+            <strong>⚠️ Important Medical Disclaimer</strong>
+            This tool is for educational and informational purposes only. It is NOT a substitute for professional medical advice, diagnosis, or treatment. Always seek the advice of your physician or qualified health provider with any questions about a medical condition. Never disregard professional medical advice or delay seeking it because of information from this tool. In case of emergency, call your local emergency services immediately.
+        </div>
+    </div>
+
+    <script>
+        function parseMarkdown(text) {
+            if (!text) return '';
+            
+            // First, escape HTML to prevent XSS
+            text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            
+            // Convert headers (must be at start of line)
+            text = text.replace(/^### (.+)$/gm, '<h4>$1</h4>');
+            text = text.replace(/^## (.+)$/gm, '<h3>$1</h3>');
+            text = text.replace(/^# (.+)$/gm, '<h2>$1</h2>');
+            
+            // Convert bold text
+            text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+            text = text.replace(/__([^_]+)__/g, '<strong>$1</strong>');
+            
+            // Convert italic text (avoid conflict with bold)
+            text = text.replace(/(?<!\*)\*([^*]+)\*(?!\*)/g, '<em>$1</em>');
+            text = text.replace(/(?<!_)_([^_]+)_(?!_)/g, '<em>$1</em>');
+            
+            // Convert unordered lists
+            text = text.replace(/^[\*\-] (.+)$/gm, '<li>$1</li>');
+            
+            // Convert ordered lists
+            text = text.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+            
+            // Group consecutive list items
+            text = text.replace(/(<li>.*?<\/li>)(\s*<li>.*?<\/li>)*/gs, function(match) {
+                return '<ul>' + match + '</ul>';
+            });
+            
+            // Convert double line breaks to paragraph breaks
+            text = text.replace(/\n\s*\n/g, '</p><p>');
+            
+            // Wrap content in paragraphs
+            text = '<p>' + text + '</p>';
+            
+            // Clean up
+            text = text.replace(/<p>\s*<\/p>/g, '');
+            text = text.replace(/<p>(\s*<h[2-4]>)/g, '$1');
+            text = text.replace(/(<\/h[2-4]>\s*)<\/p>/g, '$1');
+            text = text.replace(/<p>(\s*<ul>)/g, '$1');
+            text = text.replace(/(<\/ul>\s*)<\/p>/g, '$1');
+            
+            // Convert single line breaks to <br>
+            text = text.replace(/\n/g, '<br>');
+            
+            return text;
+        }
+
+        document.getElementById('symptoms').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault(); 
+                document.getElementById('symptomForm').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        document.getElementById('symptomForm').addEventListener('submit', async function(event) {
+            event.preventDefault();
+
+            const symptoms = document.getElementById('symptoms').value.trim();
+            const submitBtn = document.getElementById('submitBtn');
+            const loader = document.getElementById('loader');
+            const resultDiv = document.getElementById('result');
+            const resultContent = document.getElementById('resultContent');
+
+            if (!symptoms) {
+                alert('Please enter your symptoms before analyzing.');
+                return;
+            }
+
+            submitBtn.disabled = true;
+            loader.style.display = 'block';
+            resultDiv.style.display = 'none';
+            resultContent.textContent = '';
+
+            try {
+                const response = await fetch('/api/check-symptoms', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ symptoms })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || `HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json(); 
+                const htmlContent = parseMarkdown(data.result);
+                resultContent.innerHTML = htmlContent;
+                resultDiv.style.display = 'block';
+                resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+            } catch (error) {
+                console.error('Error analyzing symptoms:', error);
+                resultContent.textContent = `Error: ${error.message}. Please try again later.`;
+                resultDiv.style.display = 'block';
+            } finally {
+                submitBtn.disabled = false;
+                loader.style.display = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
